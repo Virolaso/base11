@@ -22,9 +22,19 @@
   // API: Llamadas a backend
   // ────────────────────────────────────────────────────────────────────────────
 
+  const apiBase = () => (typeof API === 'function' ? API() : window.location.origin).replace(/\/$/, '');
+  const encodePath = (value) => encodeURIComponent(String(value));
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;',
+  })[char]);
+
   async function apiListProjects() {
     try {
-      const res = await fetch('/projects');
+      const res = await fetch(`${apiBase()}/projects`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
@@ -35,7 +45,7 @@
 
   async function apiGetProject(projectId) {
     try {
-      const res = await fetch(`/projects/${projectId}`);
+      const res = await fetch(`${apiBase()}/projects/${encodePath(projectId)}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
@@ -55,7 +65,7 @@
           params.append(k, v);
         });
       }
-      const res = await fetch(`/projects?${params}`, { method: 'POST' });
+      const res = await fetch(`${apiBase()}/projects?${params}`, { method: 'POST' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
@@ -71,7 +81,7 @@
         job_id: jobId || '',
         preset_snapshot: JSON.stringify(presetSnapshot || {}),
       });
-      const res = await fetch(`/projects/${projectId}/versions?${params}`, {
+      const res = await fetch(`${apiBase()}/projects/${encodePath(projectId)}/versions?${params}`, {
         method: 'POST',
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -84,7 +94,7 @@
 
   async function apiListExports(projectId, versionName) {
     try {
-      const res = await fetch(`/projects/${projectId}/versions/${versionName}/exports`);
+      const res = await fetch(`${apiBase()}/projects/${encodePath(projectId)}/versions/${encodePath(versionName)}/exports`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
@@ -98,7 +108,7 @@
       const params = new URLSearchParams({
         name: fileName,
       });
-      const url = `/projects/${projectId}/versions/${versionName}/download/${exportId}?${params}`;
+      const url = `${apiBase()}/projects/${encodePath(projectId)}/versions/${encodePath(versionName)}/download/${encodePath(exportId)}?${params}`;
       // Crear link temporal y disparar descarga
       const a = document.createElement('a');
       a.href = url;
@@ -128,23 +138,31 @@
       return;
     }
 
-    const html = PROJECT_STATE.projects.map((project) => `
-      <div class="project-card" data-project-id="${project.project_id}">
-        <div class="project-header">
-          <h3>${project.title || 'Sin título'}</h3>
-          <span class="artist">${project.artist || 'Unknown'}</span>
+    const html = PROJECT_STATE.projects.map((project) => {
+      const projectId = escapeHtml(project.project_id);
+      const title = escapeHtml(project.title || 'Sin título');
+      const artist = escapeHtml(project.artist || 'Unknown');
+      const status = escapeHtml(project.status || 'unknown');
+      const versionCount = Number(project.versions?.length || 0);
+
+      return `
+        <div class="project-card" data-project-id="${projectId}">
+          <div class="project-header">
+            <h3>${title}</h3>
+            <span class="artist">${artist}</span>
+          </div>
+          <div class="project-meta">
+            <span class="version-count">${versionCount} versiones</span>
+            <span class="status ${status}">${status}</span>
+          </div>
+          <div class="project-actions">
+            <button class="btn-view-project" data-project-id="${projectId}">
+              Ver detalles
+            </button>
+          </div>
         </div>
-        <div class="project-meta">
-          <span class="version-count">${project.versions?.length || 0} versiones</span>
-          <span class="status ${project.status}">${project.status}</span>
-        </div>
-        <div class="project-actions">
-          <button class="btn-view-project" data-project-id="${project.project_id}">
-            Ver detalles
-          </button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     container.innerHTML = html;
 
@@ -174,38 +192,52 @@
     const container = document.getElementById('project-detail-container');
     if (!container) return;
 
-    const versionsHtml = (project.versions || []).map((version) => `
-      <div class="version-card" data-version-name="${version.version_name}">
-        <div class="version-header">
-          <h4>${version.version_name}</h4>
-          <span class="version-date">${new Date(version.created_at * 1000).toLocaleDateString()}</span>
+    const versionsHtml = (project.versions || []).map((version) => {
+      const versionName = escapeHtml(version.version_name || 'Sin versión');
+      const versionDate = Number.isFinite(Number(version.created_at))
+        ? new Date(Number(version.created_at) * 1000).toLocaleDateString()
+        : 'Fecha desconocida';
+      const description = version.description ? `<p>${escapeHtml(version.description)}</p>` : '';
+      const exportsHtml = (version.exports || []).map((exp) => {
+        const exportId = escapeHtml(exp.export_id);
+        const format = escapeHtml(exp.format || 'unknown');
+        const bitrate = escapeHtml(exp.bitrate || exp.bit_depth || '');
+        return `
+          <div class="export-item">
+            <span class="export-format">${format}</span>
+            <span class="export-bitrate">${bitrate}</span>
+            <button class="btn-download-export"
+                    data-project-id="${escapeHtml(projectId)}"
+                    data-version-name="${versionName}"
+                    data-export-id="${exportId}">
+              Descargar
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="version-card" data-version-name="${versionName}">
+          <div class="version-header">
+            <h4>${versionName}</h4>
+            <span class="version-date">${escapeHtml(versionDate)}</span>
+          </div>
+          <div class="version-description">
+            ${description}
+          </div>
+          <div class="exports-list">
+            ${exportsHtml}
+          </div>
         </div>
-        <div class="version-description">
-          ${version.description ? `<p>${version.description}</p>` : ''}
-        </div>
-        <div class="exports-list">
-          ${(version.exports || []).map((exp) => `
-            <div class="export-item">
-              <span class="export-format">${exp.format || 'unknown'}</span>
-              <span class="export-bitrate">${exp.bitrate || exp.bit_depth ? `${exp.bitrate || exp.bit_depth}` : ''}</span>
-              <button class="btn-download-export" 
-                      data-project-id="${projectId}"
-                      data-version-name="${version.version_name}"
-                      data-export-id="${exp.export_id}">
-                Descargar
-              </button>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     container.innerHTML = `
       <div class="project-detail">
         <div class="detail-header">
           <button class="btn-back" id="btn-back-to-list">← Atrás</button>
-          <h2>${project.title || 'Sin título'}</h2>
-          <span class="artist">${project.artist || 'Unknown'}</span>
+          <h2>${escapeHtml(project.title || 'Sin título')}</h2>
+          <span class="artist">${escapeHtml(project.artist || 'Unknown')}</span>
         </div>
         <div class="detail-body">
           <div class="versions-section">
