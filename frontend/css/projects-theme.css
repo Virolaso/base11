@@ -1,0 +1,295 @@
+/* 
+ * projects-theme.css
+ * Estilos para la sección de proyectos, versiones y exportes
+ */
+
+:root {
+  --project-card-bg: rgba(255, 255, 255, 0.02);
+  --project-border: rgba(255, 255, 255, 0.08);
+  --project-hover-bg: rgba(255, 255, 255, 0.05);
+  --version-bg: rgba(240, 184, 64, 0.05);
+  --version-border: rgba(240, 184, 64, 0.2);
+  --export-accent: rgba(100, 200, 255, 0.1);
+}
+
+#projects-list-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.project-card {
+  background: var(--project-card-bg);
+  border: 1px solid var(--project-border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.project-card:hover {
+  background: var(--project-hover-bg);
+  border-color: rgba(240, 184, 64, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.project-header {
+  margin-bottom: 12px;
+}
+
+.project-header h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.project-header .artist {
+  font-size: 13px;
+  color: var(--muted);
+  display: block;
+}
+
+.project-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.version-count,
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(100, 200, 100, 0.1);
+  color: #64c864;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.status.archived {
+  background: rgba(200, 100, 100, 0.1);
+  color: #c86464;
+}
+
+.project-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-view-project {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(240, 184, 64, 0.1);
+  border: 1px solid rgba(240, 184, 64, 0.3);
+  border-radius: 6px;
+  color: var(--amber);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-view-project:hover {
+  background: rgba(240, 184, 64, 0.2);
+  border-color: var(--amber);
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Project Detail
+   ──────────────────────────────────────────────────────────────────────────── */
+
+#project-detail-container {
+  padding: 20px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.project-detail {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.detail-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 30px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--project-border);
+}
+
+.btn-back {
+  background: transparent;
+  border: none;
+  color: var(--amber);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.btn-back:hover {
+  color: #ffc966;
+}
+
+.detail-header h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.detail-header .artist {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.detail-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.versions-section {
+  display: grid;
+  gap: 12px;
+}
+
+.versions-section > h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Version Card
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.version-card {
+  background: var(--version-bg);
+  border: 1px solid var(--version-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.version-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.version-header h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.version-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.version-description {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.version-description p {
+  margin: 0;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Exports List
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.exports-list {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--version-border);
+}
+
+.export-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: var(--export-accent);
+  border-radius: 6px;
+  border: 1px solid rgba(100, 200, 255, 0.15);
+  font-size: 12px;
+}
+
+.export-format {
+  font-weight: 700;
+  color: #64c8ff;
+  text-transform: uppercase;
+  min-width: 50px;
+}
+
+.export-bitrate {
+  color: var(--muted);
+  flex: 1;
+  text-align: center;
+}
+
+.btn-download-export {
+  padding: 6px 12px;
+  background: rgba(100, 200, 255, 0.15);
+  border: 1px solid rgba(100, 200, 255, 0.3);
+  border-radius: 4px;
+  color: #64c8ff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-download-export:hover {
+  background: rgba(100, 200, 255, 0.25);
+  border-color: #64c8ff;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Empty State
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
