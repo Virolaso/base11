@@ -22,9 +22,12 @@
   // API: Llamadas a backend
   // ────────────────────────────────────────────────────────────────────────────
 
+  const apiBase = () => (typeof API === 'function' ? API() : window.location.origin).replace(/\/$/, '');
+  const encodePath = (value) => encodeURIComponent(String(value));
+
   async function apiListProjects() {
     try {
-      const res = await fetch('/projects');
+      const res = await fetch(`${apiBase()}/projects`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
@@ -35,7 +38,7 @@
 
   async function apiGetProject(projectId) {
     try {
-      const res = await fetch(`/projects/${projectId}`);
+      const res = await fetch(`${apiBase()}/projects/${encodePath(projectId)}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
@@ -55,7 +58,7 @@
           params.append(k, v);
         });
       }
-      const res = await fetch(`/projects?${params}`, { method: 'POST' });
+      const res = await fetch(`${apiBase()}/projects?${params}`, { method: 'POST' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
@@ -71,7 +74,7 @@
         job_id: jobId || '',
         preset_snapshot: JSON.stringify(presetSnapshot || {}),
       });
-      const res = await fetch(`/projects/${projectId}/versions?${params}`, {
+      const res = await fetch(`${apiBase()}/projects/${encodePath(projectId)}/versions?${params}`, {
         method: 'POST',
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -84,7 +87,7 @@
 
   async function apiListExports(projectId, versionName) {
     try {
-      const res = await fetch(`/projects/${projectId}/versions/${versionName}/exports`);
+      const res = await fetch(`${apiBase()}/projects/${encodePath(projectId)}/versions/${encodePath(versionName)}/exports`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
@@ -98,7 +101,7 @@
       const params = new URLSearchParams({
         name: fileName,
       });
-      const url = `/projects/${projectId}/versions/${versionName}/download/${exportId}?${params}`;
+      const url = `${apiBase()}/projects/${encodePath(projectId)}/versions/${encodePath(versionName)}/download/${encodePath(exportId)}?${params}`;
       // Crear link temporal y disparar descarga
       const a = document.createElement('a');
       a.href = url;
