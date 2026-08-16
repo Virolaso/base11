@@ -49,7 +49,7 @@
     document.querySelectorAll('.sidebar-tab').forEach((tab) => {
       tab.addEventListener('click', () => {
         const tabName = tab.dataset.pane;
-        selectTab(tabName);
+        window.selectTab(tabName);
       });
     });
 
@@ -57,7 +57,7 @@
     try {
       const savedTab = localStorage.getItem('active-tab');
       if (savedTab) {
-        selectTab(savedTab);
+        window.selectTab(savedTab);
       }
     } catch (e) {
       console.warn('No se pudo restaurar el tab guardado:', e);
